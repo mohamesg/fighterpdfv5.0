@@ -1,3 +1,4 @@
+import 'package:cross_file/cross_file.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -531,10 +532,9 @@ class _SecurePdfViewerState extends State<SecurePdfViewer> {
       final encryptedFile = XFile(widget.encryptedPath!);
       final pemFile = XFile(widget.pemPath!);
 
-      await SharePlus.instance.share(files: [XFile(encryptedFile.path), XFile(pemFile.path)],
+      await SharePlus.instance.share(ShareParams(files: [encryptedFile, pemFile], 
         subject: 'ملف PDF مشفر',
-        text: 'ملف PDF مشفر آمن. احتاج الملفين لفتحه.',
-      );
+        text: 'ملف PDF مشفر آمن. احتاج الملفين لفتحه.'));
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
