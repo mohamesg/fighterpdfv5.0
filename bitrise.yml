@@ -1,0 +1,85 @@
+format_version: 11
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+app:
+  envs:
+    - PROJECT_LOCATION: "."
+    - FLUTTER_VERSION: "stable"
+
+workflows:
+  primary:
+    summary: Strict CI: analyze must pass, optional tests, no release build.
+    steps:
+      - git-clone@8: {}
+      - cache-pull@2: {}
+      - flutter-installer@1:
+          inputs:
+            - flutter_version: "$FLUTTER_VERSION"
+      - script@1:
+          title: Sanity: show project tree & Flutter version
+          inputs:
+            - content: |
+                set -ex
+                pwd
+                ls -la
+                ls -la "$PROJECT_LOCATION"
+                flutter --version
+                flutter doctor -v
+      - script@1:
+          title: Pub get
+          inputs:
+            - content: |
+                set -ex
+                cd "$PROJECT_LOCATION"
+                flutter pub get
+      - flutter-analyze@0:
+          inputs:
+            - project_location: "$PROJECT_LOCATION"
+            - fail_severity: "error"
+      - cache-push@2:
+          inputs:
+            - paths: |
+                ~/.pub-cache
+                ~/.gradle/caches
+                $PROJECT_LOCATION/.dart_tool
+                $PROJECT_LOCATION/build
+
+  build_apk:
+    summary: Android release build via Flutter (no Gradle-first steps).
+    steps:
+      - git-clone@8: {}
+      - cache-pull@2: {}
+      - flutter-installer@1:
+          inputs:
+            - flutter_version: "$FLUTTER_VERSION"
+      - script@1:
+          title: Pub get
+          inputs:
+            - content: |
+                set -ex
+                cd "$PROJECT_LOCATION"
+                flutter pub get
+      - flutter-analyze@0:
+          inputs:
+            - project_location: "$PROJECT_LOCATION"
+            - fail_severity: "none"
+      - flutter-build@0:
+          inputs:
+            - project_location: "$PROJECT_LOCATION"
+            - platform: "android"
+            - android_output_type: "apk"
+            - android_additional_params: "--release"
+      - deploy-to-bitrise-io@2: {}
+      - cache-push@2:
+          inputs:
+            - paths: |
+                ~/.pub-cache
+                ~/.gradle/caches
+                $PROJECT_LOCATION/.dart_tool
+                $PROJECT_LOCATION/build
+
+trigger_map:
+  - push_branch: "*"
+    workflow: primary
+  - tag: "*"
+    workflow: build_apk

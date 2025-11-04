@@ -1,0 +1,97 @@
+plugins {
+    id "com.android.application"
+    id "org.jetbrains.kotlin.android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode') ?: '1'
+def flutterVersionName = localProperties.getProperty('flutter.versionName') ?: '1.0'
+
+android {
+    namespace "com.example.fighter_doctors_pdf"
+    compileSdk 34
+    ndkVersion flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    defaultConfig {
+        applicationId "com.example.fighter_doctors_pdf"
+        minSdk 26
+        targetSdk 34
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+        multiDexEnabled true
+    }
+
+    signingConfigs {
+        release {
+            // Use your own keystore for real publishing
+            storeFile file("../app/key.jks")
+            storePassword "your_password"
+            keyAlias "your_alias"
+            keyPassword "your_password"
+        }
+        debug {
+            storeFile file("${System.properties['user.home']}/.android/debug.keystore")
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.debug // Change to signingConfigs.release when you add a real key
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            debuggable true
+        }
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    packaging {
+        resources {
+            excludes += [
+                'META-INF/proguard/androidx-*.pro',
+                'META-INF/proguard/androidx-annotation-*.pro'
+            ]
+        }
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+dependencies {
+    // Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.25"
+
+    // AndroidX
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.core:core-ktx:1.13.1'
+
+    // Security
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+
+    // Performance
+    implementation 'androidx.work:work-runtime-ktx:2.9.1'
+}
