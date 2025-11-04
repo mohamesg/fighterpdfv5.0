@@ -47,7 +47,7 @@ class EncryptionUtils {
       final publicKeyBitString = topLevelSeq.elements[1] as ASN1BitString;
 
       // ✅ Fixed: correct getter for ASN1BitString
-      final publicKeyAsn1 = ASN1Parser(publicKeyBitString.valueBytes!).nextObject();
+      final publicKeyAsn1 = ASN1Parser(publicKeyBitString.contentBytes()).nextObject();
       final publicKeySeq = publicKeyAsn1 as ASN1Sequence;
 
       final modulus = publicKeySeq.elements[0] as ASN1Integer;

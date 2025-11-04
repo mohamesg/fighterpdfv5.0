@@ -1,4 +1,6 @@
+import 'package:cross_file/cross_file.dart';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
@@ -119,8 +121,7 @@ class _HomePageState extends State<HomePage> {
       provider.setStatus('جاري فتح محرر PDF...');
 
       // Open PDF editor with annotations
-      String? editedPath;
-      await FlutterPdfAnnotations.openPDF(
+      final String? editedPath = await FlutterPdfAnnotations.openPDF(
         filePath: originalPath,
         savePath: originalPath.replaceAll('.pdf', '_edited.pdf'),
         onFileSaved: (savedPath) {
@@ -619,10 +620,9 @@ class ShareScreen extends StatelessWidget {
       final encryptedFile = XFile(encryptedPath);
       final pemFile = XFile(pemPath);
 
-      await SharePlus.instance.share(files: [XFile(encryptedFile.path), XFile(pemFile.path)],
+      await SharePlus.instance.share(ShareParams(files: [encryptedFile, pemFile], 
         subject: 'ملف PDF مشفر آمن',
-        text: 'ملف PDF مشفر بأمان. احتاج الملفين معاً لفتحه.',
-      );
+        text: 'ملف PDF مشفر بأمان. احتاج الملفين معاً لفتحه.'));
     } catch (e) {
       print('خطأ في المشاركة: $e');
     }
